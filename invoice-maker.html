@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>手帐发票素材生成器</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="stylesheet" href="invoice-maker.css"/>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-ico">🧾</div>
+  <div><h1>手帐发票素材生成器</h1><p>自定义票据 · 打印收藏 · 手帐贴纸</p></div>
+</div>
+<div class="mob-nav">
+  <button class="mob-btn active" id="mob-form-btn" onclick="mobView('form')">✏️ 编辑</button>
+  <button class="mob-btn" id="mob-prev-btn" onclick="mobView('preview')">👁 预览</button>
+</div>
+<div class="layout">
+<div class="panel" id="panel-section">
+  <div class="ptitle">🎨 编辑设置</div>
+  <!-- Type -->
+  <div class="sec">
+    <label>发票类型</label>
+    <div class="ttabs">
+      <button class="ttab act-dining" data-type="dining" onclick="setType('dining')"><span class="ico">🍜</span>餐饮</button>
+      <button class="ttab" data-type="clothing" onclick="setType('clothing')"><span class="ico">👗</span>服装</button>
+      <button class="ttab" data-type="daily" onclick="setType('daily')"><span class="ico">🧴</span>日化</button>
+      <button class="ttab" data-type="digital" onclick="setType('digital')"><span class="ico">💻</span>数码</button>
+      <button class="ttab" data-type="tea" onclick="setType('tea')"><span class="ico">🧋</span>茶饮</button>
+    </div>
+  </div>
+  <!-- Logo -->
+  <div class="sec">
+    <label>店铺 Logo（可选）</label>
+    <div class="logo-area">
+      <input type="file" id="logo-input" accept="image/*" title="上传Logo" onchange="loadLogo(event)"/>
+      <img id="logo-prev" src="" alt="预览"/>
+      <span class="logo-ico" id="logo-ico">🏪</span>
+      <span class="logo-hint" id="logo-hint">点击上传图片</span>
+      <button id="logo-clear" onclick="clearLogo(event)">✕</button>
+    </div>
+    <!-- Preset logos (shown for tea type) -->
+    <div class="preset-logos" id="preset-logos">
+      <div class="preset-label">或选择常用品牌</div>
+      <div class="preset-grid" id="preset-grid"></div>
+    </div>
+  </div>
+  <!-- Store Name -->
+  <div class="sec">
+    <label>店铺名称</label>
+    <input type="text" id="storeName" value="小满食堂" placeholder="店铺名称" oninput="render()"/>
+  </div>
+  <!-- Date / Time -->
+  <div class="sec r2">
+    <div><label>日期</label><input type="date" id="invDate" oninput="render()"/></div>
+    <div><label>时间</label><input type="time" id="invTime" oninput="render()"/></div>
+  </div>
+  <!-- Platform -->
+  <div class="sec">
+    <label>消费平台（选填）</label>
+    <select id="platform" onchange="render()">
+      <option value="">不显示</option>
+      <option value="淘宝">淘宝</option>
+      <option value="京东">京东</option>
+      <option value="抖音">抖音</option>
+      <option value="拼多多">拼多多</option>
+      <option value="小红书">小红书</option>
+      <option value="微信小程序">微信小程序</option>
+      <option value="门店自提">门店自提</option>
+    </select>
+  </div>
+  <!-- Remark -->
+  <div class="sec">
+    <label>备注</label>
+    <input type="text" id="remark" placeholder="例：自提 / 堂食 / 外卖" oninput="render()"/>
+  </div>
+  <!-- Dining extra -->
+  <div class="xfld on" id="xfld-dining">
+    <div class="sec r2">
+      <div><label>桌号（选填）</label><input type="text" id="tableNo" placeholder="如 08" oninput="render()"/></div>
+      <div><label>服务员（选填）</label><input type="text" id="server" placeholder="服务员姓名" oninput="render()"/></div>
+    </div>
+  </div>
+  <!-- Clothing extra -->
+  <div class="xfld" id="xfld-clothing">
+    <div class="sec r2">
+      <div><label>门店编号（选填）</label><input type="text" id="shopNo" placeholder="如 SH-001" oninput="render()"/></div>
+      <div><label>收银员（选填）</label><input type="text" id="cashier" placeholder="收银员姓名" oninput="render()"/></div>
+    </div>
+  </div>
+  <!-- Daily extra -->
+  <div class="xfld" id="xfld-daily">
+    <div class="sec r2">
+      <div><label>门店编号（选填）</label><input type="text" id="shopNo2" placeholder="如 DL-001" oninput="render()"/></div>
+      <div><label>收银员（选填）</label><input type="text" id="cashier2" placeholder="收银员姓名" oninput="render()"/></div>
+    </div>
+  </div>
+  <!-- Digital extra -->
+  <div class="xfld" id="xfld-digital">
+    <div class="sec r2">
+      <div><label>订单号（选填）</label><input type="text" id="orderNo" placeholder="如 JD12345678" oninput="render()"/></div>
+      <div><label>保修期（选填）</label><input type="text" id="warranty" placeholder="如 1年" oninput="render()"/></div>
+    </div>
+  </div>
+  <!-- Tea extra -->
+  <div class="xfld" id="xfld-tea">
+    <div class="sec r2">
+      <div><label>门店（选填）</label><input type="text" id="branch" placeholder="如 春熙路店" oninput="render()"/></div>
+      <div><label>会员名（选填）</label><input type="text" id="member" placeholder="不填则不显示" oninput="render()"/></div>
+    </div>
+  </div>
+  <!-- Items -->
+  <div class="sec">
+    <label>商品明细</label>
+    <div class="col-hdr"><span>品名</span><span>数量</span><span>原价</span><span>优惠价</span><span></span></div>
+    <div id="item-list"></div>
+    <button class="badd" onclick="addItem()">＋ 添加商品</button>
+  </div>
+  <!-- Paper Size -->
+  <div class="sec">
+    <label>输出尺寸</label>
+    <div class="size-tabs">
+      <button class="stab" data-size="a7" onclick="changePaperSize('a7')">A7<span>74×105mm</span></button>
+      <button class="stab act-size" data-size="a6" onclick="changePaperSize('a6')">A6<span>105×148mm</span></button>
+      <button class="stab" data-size="a5" onclick="changePaperSize('a5')">A5<span>148×210mm</span></button>
+    </div>
+  </div>
+  <div class="acts" id="action-bar">
+    <button id="btn-dl" class="bact bprim" onclick="downloadInvoice()">⬇ 保存图片</button>
+    <button class="bact bsec" onclick="printInvoice()">🖨 打印</button>
+  </div>
+</div>
+<!-- RIGHT: Preview -->
+<div class="prev-wrap" id="preview-section">
+  <div class="prev-label">▸ 实时预览</div>
+  <div class="inv-cont">
+    <div id="invoice" class="dining"></div>
+  </div>
+</div>
+</div>
+<script src="invoice-maker.js"></script>
+</body>
+</html>
